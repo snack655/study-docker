@@ -1,0 +1,18 @@
+FROM mysql:8.0.31
+
+# Download the sakila db, and prepare the database
+RUN cd /docker-entrypoint-initdb.d/ && \
+    curl -L http://downloads.mysql.com/docs/sakila-db.tar.gz | tar -xz && \
+    mv sakila-db/sakila-schema.sql ./01-sakila-schema.sql && \
+    mv sakila-db/sakila-data.sql ./02-sakila-data.sql && \
+    rm -rf sakila-db
+
+# Root password
+ENV MYSQL_ROOT_PASSWORD password
+
+COPY ./my.cnf /etc/mysql/conf.d/my.cnf
+
+# Default MySQL port
+EXPOSE 3308
+
+CMD [ "mysqld" ]

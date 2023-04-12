@@ -1,18 +1,16 @@
-FROM node:16
-
-# 앱 디렉터리 생성
-WORKDIR /usr/src/app
-# 앱 의존성 설치
-# 가능한 경우(nmp@5+) package.json과 package-lock.json을 모두 복사하기 위해
-# 와일드카드를 사용
-COPY package*.json ./
-
+# 최신 Node.js LTS 버전
+FROM node:18.13.0
+# Node.js 앱을 위한 app 폴더 생성
+VOLUME ["e:/mynode", "/app"]
+# 어플리케이션 폴더를 WORKDIR명령어로 지정 - 서버 가동용
+WORKDIR /app
+# 가능한 package.json 과 package-lock.json을 모두 복사하기 위해서 와일드 카드 사용
+COPY package*.json /app/
+# 의존성 설치
 RUN npm install
-# 프로덕션을 위한 코드를 빌드하는 경우
-# RUN npm ci --omit=dev
-
-# 앱 소스 추가
-COPY . .
-
-EXPOSE 8080
-CMD [ "node", "server.js" ]
+# 앱 소스코드 추가
+COPY app.js /app/
+# 앱이 3000번 포트에 바인딩 되어있기 때문에 컨테이너의 3000번 포트를 열어줌
+EXPOSE 5000
+# 인자값을 지정하지 않을시 node app.js를 실행
+CMD [ "node", "app.js" ]
