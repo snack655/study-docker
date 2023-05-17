@@ -1,0 +1,68 @@
+services:
+  modo:
+    build:
+      args:
+      - NODE_ENV=development
+      context: modo
+      target: development    
+    command: npm start
+    environment:
+      - DATABASE_DB=modo
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=1234
+      - DATABASE_ROOT_PASSWORD=/run/secrets/db-password
+      - DATABASE_HOST=db
+      - NODE_ENV=development
+    ports:
+      # - 80:80
+      - 9000:9000
+    secrets:
+      - db-password
+    volumes:
+      - ./modo:/code:ro
+      - ./modo/package.json:/code/package.json
+      - ./modo/package-lock.json:/code/package-lock.json
+    networks:
+      - public
+      - private
+    depends_on:
+      - db
+  db:
+    # We use a mariadb image which supports both amd64 & arm64 architecture
+    # image: mariadb:10.6.4-focal
+    # If you really want to use MySQL, uncomment the following line
+    build: ./db
+    command: --default-authentication-plugin=mysql_native_password;
+    restart: always
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - private
+    environment:
+      - MYSQL_DATABASE=modo
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-password
+    ports:
+      - 3307:3306
+  # frontend:
+  #   build:
+  #     context: front
+  #     target: development
+    # ports:
+    #   - 3000:3000
+    # volumes:
+      # - ./frontend/src:/code/src
+      # - /code/node_modules
+    # networks:
+    #   - public
+    # depends_on:
+    #   - backend
+networks:
+  public:
+  private:
+volumes:
+  db-data:
+secrets:
+  db-password:
+    file: db/password.txt
